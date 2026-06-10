@@ -240,6 +240,10 @@ float cellpert_tsfact;    /* factor on the refreshing perturbation time scale (w
 /*--- Rayleigh Damping Layer ---*/
 int dampingLayerSelector;       // Rayleigh Damping Layer selector
 float dampingLayerDepth;       // Rayleigh Damping Layer Depth
+/*--- Lateral Rayleigh Damping (sponge) Layer ---*/
+int lateralDampingSelector;     // Lateral Rayleigh damping (sponge) selector: 0= off, 1= on
+int lateralDampingWidth;        // Lateral sponge width in cells, applied inward from each x/y face
+float lateralDampingCoeff;      // Lateral sponge maximum damping rate (1/s)
 
 /*---AUX_SCALARS*/
 /*Auxiliary Scalar Fields*/
@@ -576,11 +580,19 @@ int hydro_coreGetParams(){
    /*New EXTENSIONS sub-module style call to get parameters for the GAD sub-module*/
    errorCode = GADGetParams();
 #endif
-   dampingLayerSelector = 0; // Default to off 
+   dampingLayerSelector = 0; // Default to off
    errorCode = queryIntegerParameter("dampingLayerSelector", &dampingLayerSelector, 0, 1, PARAM_OPTIONAL);
    if(dampingLayerSelector == 1){
-     dampingLayerDepth = 100.0; //Default to 100.0 (meters)  
+     dampingLayerDepth = 100.0; //Default to 100.0 (meters)
      errorCode = queryFloatParameter("dampingLayerDepth", &dampingLayerDepth, 0.0, FLT_MAX, PARAM_OPTIONAL);
+   }
+   lateralDampingSelector = 0; // Default to off
+   errorCode = queryIntegerParameter("lateralDampingSelector", &lateralDampingSelector, 0, 1, PARAM_OPTIONAL);
+   if(lateralDampingSelector == 1){
+     lateralDampingWidth = 40; //Default to 40 cells
+     errorCode = queryIntegerParameter("lateralDampingWidth", &lateralDampingWidth, 1, INT_MAX, PARAM_OPTIONAL);
+     lateralDampingCoeff = 0.2; //Default maximum damping rate (1/s), matches top-layer scale
+     errorCode = queryFloatParameter("lateralDampingCoeff", &lateralDampingCoeff, 0.0, FLT_MAX, PARAM_OPTIONAL);
    }
    /*Auxiliary scalar parameters*/
    NhydroAuxScalars = 0; // Default to zero auxiliary scalars
@@ -824,6 +836,9 @@ int hydro_coreInit(){
       printComment("----------: RAYLEIGH DAMPING LAYER ---"); 
       printParameter("dampingLayerSelector", "Rayleigh damping layer selector: 0= off, 1= on.");
       printParameter("dampingLayerDepth", "Rayleigh damping layer depth in meters");
+      printParameter("lateralDampingSelector", "Lateral Rayleigh damping (sponge) selector: 0= off, 1= on.");
+      printParameter("lateralDampingWidth", "Lateral sponge width in cells, inward from each x/y face");
+      printParameter("lateralDampingCoeff", "Lateral sponge maximum damping rate (1/s)");
 
       printComment("----------: AUXILIARY SCALARS ---");
       printParameter("NhydroAuxScalars", "Number of prognostic auxiliary scalar fields");
@@ -1019,8 +1034,11 @@ int hydro_coreInit(){
      MPI_Bcast(&cellpert_eckert, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
      MPI_Bcast(&cellpert_tsfact, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
    }
-   MPI_Bcast(&dampingLayerSelector, 1, MPI_INT, 0, MPI_COMM_WORLD); 
-   MPI_Bcast(&dampingLayerDepth, 1, MPI_FLOAT, 0, MPI_COMM_WORLD); 
+   MPI_Bcast(&dampingLayerSelector, 1, MPI_INT, 0, MPI_COMM_WORLD);
+   MPI_Bcast(&dampingLayerDepth, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
+   MPI_Bcast(&lateralDampingSelector, 1, MPI_INT, 0, MPI_COMM_WORLD);
+   MPI_Bcast(&lateralDampingWidth, 1, MPI_INT, 0, MPI_COMM_WORLD);
+   MPI_Bcast(&lateralDampingCoeff, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
    MPI_Bcast(&NhydroAuxScalars, 1, MPI_INT, 0, MPI_COMM_WORLD);
    if(NhydroAuxScalars > 0){
      MPI_Bcast(&AuxScAdvSelector, 1, MPI_INT, 0, MPI_COMM_WORLD);

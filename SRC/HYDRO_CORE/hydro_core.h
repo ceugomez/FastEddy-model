@@ -242,6 +242,10 @@ extern float cellpert_tsfact;    /* factor on the refreshing perturbation time s
 /*---RAYLEIGH DAMPING LAYER*/
 extern int dampingLayerSelector;       // Rayleigh Damping Layer selector
 extern float dampingLayerDepth;       // Rayleigh Damping Layer Depth
+/*---LATERAL RAYLEIGH DAMPING (SPONGE) LAYER*/
+extern int lateralDampingSelector;     // Lateral Rayleigh damping (sponge) selector: 0= off, 1= on
+extern int lateralDampingWidth;        // Lateral sponge width in cells, applied inward from each x/y face
+extern float lateralDampingCoeff;      // Lateral sponge maximum damping rate (1/s)
 				      //
 /*---AUX_SCALARS*/
 /*Auxiliary Scalar Fields*/

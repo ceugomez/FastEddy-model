@@ -1111,6 +1111,20 @@ __global__ void cudaDevice_hydroCoreComplete(float simTime, int simTime_it, floa
         cudaDevice_topRayleighDampingLayerForcing(fld, fldFrhs,
                                                   &rho[0], &rho_BS[0], zPos_d);
       }  //end if dampingLayerSelector > 0
+      if(lateralDampingSelector_d > 0){        // LATERAL RAYLEIGH DAMPING (SPONGE) ON U,V,W,THETA  ****!!!!
+        cudaDevice_lateralRayleighDampingForcing(U_INDX, &hydroFlds[U_INDX*fldStride],
+                  &hydroFldsFrhs[U_INDX*fldStride], &rho[0], &rho_BS[0],
+                  &hydroBaseStateFlds[THETA_INDX_BS*fldStride], zPos_d);
+        cudaDevice_lateralRayleighDampingForcing(V_INDX, &hydroFlds[V_INDX*fldStride],
+                  &hydroFldsFrhs[V_INDX*fldStride], &rho[0], &rho_BS[0],
+                  &hydroBaseStateFlds[THETA_INDX_BS*fldStride], zPos_d);
+        cudaDevice_lateralRayleighDampingForcing(W_INDX, &hydroFlds[W_INDX*fldStride],
+                  &hydroFldsFrhs[W_INDX*fldStride], &rho[0], &rho_BS[0],
+                  &hydroBaseStateFlds[THETA_INDX_BS*fldStride], zPos_d);
+        cudaDevice_lateralRayleighDampingForcing(THETA_INDX, &hydroFlds[THETA_INDX*fldStride],
+                  &hydroFldsFrhs[THETA_INDX*fldStride], &rho[0], &rho_BS[0],
+                  &hydroBaseStateFlds[THETA_INDX_BS*fldStride], zPos_d);
+      }  //end if lateralDampingSelector > 0
       if(buoyancySelector_d > 0){              // BUOYANCY SOURCE?SINK OF W   ******!!!!!!!!
         ijk = i*iStride + j*jStride + k*kStride;
         if (moistureSelector_d>0){

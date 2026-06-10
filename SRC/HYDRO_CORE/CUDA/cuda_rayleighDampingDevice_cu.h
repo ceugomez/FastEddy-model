@@ -23,6 +23,10 @@
 /*---RAYLEIGH DAMPING LAYER*/
 extern __constant__ int dampingLayerSelector_d;       // Rayleigh Damping Layer selector
 extern __constant__ float dampingLayerDepth_d;       // Rayleigh Damping Layer Depth
+/*---LATERAL RAYLEIGH DAMPING (SPONGE) LAYER*/
+extern __constant__ int lateralDampingSelector_d;     // Lateral Rayleigh damping (sponge) selector: 0= off, 1= on
+extern __constant__ int lateralDampingWidth_d;        // Lateral sponge width in cells, applied inward from each x/y face
+extern __constant__ float lateralDampingCoeff_d;      // Lateral sponge maximum damping rate (1/s)
 
 /*##############------------ RAYLEIGHDAMPING_CUDADEV submodule function declarations ------------------############*/
 
@@ -41,5 +45,11 @@ extern "C" int cuda_rayleighDampingDeviceCleanup();
 */
 __device__ void cudaDevice_topRayleighDampingLayerForcing(float* scalarField, float* scalarFrhs,
                                                           float* rho, float* rhoBS, float* zPos_d);
+
+/*----->>>>> __device__ void cudaDevice_lateralRayleighDampingForcing();  ------------------------------------------
+* Lateral Rayleigh damping (sponge) forcing term, relaxing momentum/theta to base state near the four x/y faces.
+*/
+__device__ void cudaDevice_lateralRayleighDampingForcing(int fldIndx, float* scalarField, float* scalarFrhs,
+                                                         float* rho, float* rhoBS, float* thetaBS, float* zPos_d);
 
 #endif // _RAYLEIGHDAMPING_CUDADEV_CU_H
