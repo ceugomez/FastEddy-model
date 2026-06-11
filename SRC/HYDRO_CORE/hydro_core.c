@@ -587,11 +587,11 @@ int hydro_coreGetParams(){
      errorCode = queryFloatParameter("dampingLayerDepth", &dampingLayerDepth, 0.0, FLT_MAX, PARAM_OPTIONAL);
    }
    lateralDampingSelector = 0; // Default to off
+   lateralDampingWidth = 40;   // Default to 40 cells (always initialized; copied to device unconditionally)
+   lateralDampingCoeff = 0.2;  // Default maximum damping rate (1/s), matches top-layer scale
    errorCode = queryIntegerParameter("lateralDampingSelector", &lateralDampingSelector, 0, 1, PARAM_OPTIONAL);
    if(lateralDampingSelector == 1){
-     lateralDampingWidth = 40; //Default to 40 cells
      errorCode = queryIntegerParameter("lateralDampingWidth", &lateralDampingWidth, 1, INT_MAX, PARAM_OPTIONAL);
-     lateralDampingCoeff = 0.2; //Default maximum damping rate (1/s), matches top-layer scale
      errorCode = queryFloatParameter("lateralDampingCoeff", &lateralDampingCoeff, 0.0, FLT_MAX, PARAM_OPTIONAL);
    }
    /*Auxiliary scalar parameters*/
